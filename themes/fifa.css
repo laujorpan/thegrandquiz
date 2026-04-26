@@ -1,0 +1,330 @@
+@import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800&display=swap');
+
+:root {
+	--accent:   #C9A84C;
+	--dark:     #00A8E8;
+	--light:    #0a0e27;
+	--white:    #141830;
+	--success:  #00e676;
+	--error:    #ff1744;
+	--radius:   4px;
+	--shadow:   0 8px 32px rgba(0,168,232,0.18), 0 2px 8px rgba(0,0,0,0.5);
+}
+
+body {
+	font-family: 'Barlow Condensed', sans-serif;
+	background: #0a0e27;
+	background-image:
+		radial-gradient(ellipse at top, #0d1540 0%, #0a0e27 60%),
+		repeating-linear-gradient(
+			90deg,
+			transparent,
+			transparent 60px,
+			rgba(0,168,232,0.03) 60px,
+			rgba(0,168,232,0.03) 61px
+		);
+	color: #e0e6f0;
+	font-weight: 600;
+}
+
+.card {
+	background: linear-gradient(145deg, #1a1f3c 0%, #141830 100%);
+	border: 1px solid rgba(201,168,76,0.35);
+	box-shadow: 0 8px 32px rgba(0,168,232,0.18), 0 2px 8px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.05);
+}
+
+.title {
+	font-family: 'Barlow Condensed', sans-serif;
+	font-weight: 800;
+	font-size: 2.4rem;
+	text-transform: uppercase;
+	color: #ffffff;
+	letter-spacing: 0.06em;
+	text-shadow: 0 0 30px rgba(0,168,232,0.5);
+}
+
+.subtitle {
+	font-family: 'Barlow Condensed', sans-serif;
+	font-size: 1.1rem;
+	font-weight: 400;
+	color: #8a9bbf;
+	line-height: 1.6;
+}
+
+.question-text {
+	font-family: 'Barlow Condensed', sans-serif;
+	font-weight: 700;
+	font-size: 1.35rem;
+	color: #ffffff;
+	text-transform: uppercase;
+	letter-spacing: 0.03em;
+	padding: 12px 16px;
+	background: linear-gradient(90deg, rgba(0,168,232,0.12) 0%, transparent 100%);
+	border-left: 4px solid #C9A84C;
+}
+
+.counter {
+	font-family: 'Barlow Condensed', sans-serif;
+	font-weight: 700;
+	font-size: 0.9rem;
+	color: #C9A84C;
+	text-transform: uppercase;
+	letter-spacing: 0.1em;
+}
+
+.hint {
+	font-family: 'Barlow Condensed', sans-serif;
+	font-size: 0.85rem;
+	color: #5a6a8a;
+	font-weight: 400;
+}
+
+.btn {
+	font-family: 'Barlow Condensed', sans-serif;
+	font-size: 1.1rem;
+	font-weight: 700;
+	text-transform: uppercase;
+	letter-spacing: 0.08em;
+	border-radius: 4px;
+}
+
+.btn-primary {
+	background: linear-gradient(135deg, #0077b6 0%, #00A8E8 100%);
+	color: #ffffff;
+	border: 1px solid rgba(0,168,232,0.5);
+	box-shadow: 0 4px 16px rgba(0,168,232,0.3);
+}
+.btn-primary:hover {
+	opacity: 1;
+	background: linear-gradient(135deg, #0090d0 0%, #22c2ff 100%);
+	box-shadow: 0 6px 20px rgba(0,168,232,0.5);
+}
+
+.btn-secondary {
+	background: rgba(255,255,255,0.05);
+	color: #8a9bbf;
+	border: 1px solid rgba(255,255,255,0.12);
+}
+.btn-secondary:hover {
+	border-color: #C9A84C;
+	color: #C9A84C;
+}
+
+.btn-danger {
+	background: linear-gradient(135deg, #b71c1c, #ff1744);
+	border: none;
+}
+
+.btn-back {
+	font-family: 'Barlow Condensed', sans-serif;
+	font-weight: 600;
+	color: #5a6a8a;
+	letter-spacing: 0.05em;
+}
+.btn-back:hover {
+	color: #C9A84C;
+}
+
+.progress-bar-wrap {
+	background: rgba(255,255,255,0.06);
+	border-radius: 2px;
+	height: 6px;
+	border: none;
+}
+.progress-bar {
+	background: linear-gradient(90deg, #C9A84C, #f0c96a);
+	border-radius: 2px;
+	box-shadow: 0 0 10px rgba(201,168,76,0.6);
+}
+
+.option-label {
+	border: 1px solid rgba(255,255,255,0.10);
+	background: rgba(255,255,255,0.03);
+	color: #c0cce0;
+	font-family: 'Barlow Condensed', sans-serif;
+	font-size: 1rem;
+	font-weight: 600;
+	text-transform: uppercase;
+	letter-spacing: 0.03em;
+}
+.option-label:hover {
+	border-color: #00A8E8;
+	background: rgba(0,168,232,0.08);
+	color: #ffffff;
+}
+.option-label.selected {
+	border-color: #C9A84C;
+	background: rgba(201,168,76,0.10);
+	color: #ffffff;
+}
+.option-label input[type="checkbox"] {
+	accent-color: #C9A84C;
+}
+
+.feedback-title {
+	font-family: 'Barlow Condensed', sans-serif;
+	font-weight: 800;
+	font-size: 1.8rem;
+	text-transform: uppercase;
+	letter-spacing: 0.05em;
+}
+.feedback-title.correct { color: #00e676; }
+.feedback-title.incorrect { color: #ff1744; }
+
+.feedback-question-text {
+	font-family: 'Barlow Condensed', sans-serif;
+	font-size: 1rem;
+	color: #5a6a8a;
+	font-style: normal;
+	font-weight: 400;
+}
+
+.feedback-option {
+	font-family: 'Barlow Condensed', sans-serif;
+	font-size: 1rem;
+	font-weight: 600;
+	text-transform: uppercase;
+	letter-spacing: 0.03em;
+	border-radius: 4px;
+}
+.feedback-option.correct-answer {
+	background: rgba(0,230,118,0.10);
+	border-color: #00e676;
+	color: #00e676;
+}
+.feedback-option.wrong-selected {
+	background: rgba(255,23,68,0.10);
+	border-color: #ff1744;
+	color: #ff5566;
+}
+.feedback-option.neutral {
+	background: rgba(255,255,255,0.04);
+	border-color: rgba(255,255,255,0.08);
+	color: #5a6a8a;
+}
+
+.result-title {
+	font-family: 'Barlow Condensed', sans-serif;
+	font-weight: 800;
+	font-size: 2rem;
+	text-transform: uppercase;
+	color: #ffffff;
+	letter-spacing: 0.05em;
+}
+
+.result-score {
+	font-family: 'Barlow Condensed', sans-serif;
+	font-weight: 800;
+	color: #C9A84C;
+	font-size: 3.5rem;
+	text-shadow: 0 0 30px rgba(201,168,76,0.5);
+}
+
+.result-message {
+	font-family: 'Barlow Condensed', sans-serif;
+	font-size: 1.1rem;
+	font-weight: 400;
+	color: #5a6a8a;
+}
+
+.prize-box {
+	background: rgba(201,168,76,0.08);
+	border: 1px solid rgba(201,168,76,0.4);
+}
+
+.prize-label {
+	font-family: 'Barlow Condensed', sans-serif;
+	font-size: 0.85rem;
+	font-weight: 700;
+	color: #C9A84C;
+	letter-spacing: 0.1em;
+}
+
+.discount-code {
+	background: linear-gradient(135deg, #C9A84C, #f0c96a);
+	color: #0a0e27;
+	font-family: 'Barlow Condensed', sans-serif;
+	font-weight: 800;
+	font-size: 1.8rem;
+	letter-spacing: 0.15em;
+	border-radius: 4px;
+}
+
+.btn-copy {
+	background: rgba(201,168,76,0.15);
+	color: #C9A84C;
+	border-radius: 4px;
+	border: 1px solid rgba(201,168,76,0.4);
+	font-family: 'Barlow Condensed', sans-serif;
+	font-weight: 700;
+	letter-spacing: 0.05em;
+}
+.btn-copy:hover {
+	background: rgba(201,168,76,0.25);
+}
+.btn-copy.copied {
+	background: #00e676;
+	color: #0a0e27;
+	border-color: #00e676;
+}
+
+.review-title {
+	font-family: 'Barlow Condensed', sans-serif;
+	font-weight: 800;
+	font-size: 1.8rem;
+	text-transform: uppercase;
+	color: #ffffff;
+	letter-spacing: 0.05em;
+}
+
+.review-subtitle {
+	font-family: 'Barlow Condensed', sans-serif;
+	font-size: 0.9rem;
+	font-weight: 400;
+	color: #5a6a8a;
+}
+
+.review-item {
+	border: 1px solid rgba(255,255,255,0.08);
+	border-radius: 4px;
+}
+
+.review-item-header {
+	background: linear-gradient(90deg, #0077b6, #00A8E8);
+	color: #ffffff;
+	font-family: 'Barlow Condensed', sans-serif;
+	font-weight: 700;
+	letter-spacing: 0.08em;
+}
+
+.review-item-question {
+	background: rgba(255,255,255,0.02);
+	color: #c0cce0;
+	font-family: 'Barlow Condensed', sans-serif;
+	font-weight: 700;
+	font-size: 1rem;
+	text-transform: uppercase;
+	letter-spacing: 0.03em;
+}
+
+.review-option {
+	background: rgba(255,255,255,0.01);
+	color: #5a6a8a;
+	font-family: 'Barlow Condensed', sans-serif;
+	font-size: 0.95rem;
+	font-weight: 600;
+}
+
+.review-option.is-correct {
+	background: rgba(0,230,118,0.08);
+	color: #00e676;
+}
+
+.warning-box {
+	background: rgba(255,193,7,0.08);
+	border-color: rgba(255,193,7,0.4);
+	font-family: 'Barlow Condensed', sans-serif;
+	font-size: 1rem;
+	font-weight: 600;
+	color: #ffc107;
+}

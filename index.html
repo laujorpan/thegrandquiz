@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>El gran quiz de Darwinex</title>
+	<link rel="stylesheet" href="style.css">
+	<link id="theme-link" rel="stylesheet">
+	<script>
+		(function () {
+			var THEMES = ['default', 'grand-prix', 'nintendo', 'fifa'];
+			var params = new URLSearchParams(location.search);
+			var theme = params.get('theme');
+			if (theme && THEMES.includes(theme)) {
+				document.getElementById('theme-link').href = 'themes/' + theme + '.css';
+			}
+		})();
+	</script>
+</head>
+<body>
+
+	<!-- PANTALLA 1: Inicio -->
+	<div id="screen-start" class="screen active">
+		<div class="card">
+			<img src="assets/logo.png" alt="Logo Iker" class="logo">
+			<h1 class="title">El gran quiz de Darwinex</h1>
+			<p class="subtitle">Edición especial "Volví casado y no me sé mi password"</p>
+			<button id="btn-start" class="btn btn-primary">Empezar el reto</button>
+		</div>
+	</div>
+
+	<!-- PANTALLA 2: Pregunta -->
+	<div id="screen-question" class="screen">
+		<div class="card">
+			<div class="progress-bar-wrap">
+				<div id="progress-bar" class="progress-bar"></div>
+			</div>
+			<p id="question-counter" class="counter">Pregunta 1 de 10</p>
+			<h2 id="question-text" class="question-text"></h2>
+			<p class="hint">Selecciona todas las respuestas correctas</p>
+			<div id="options-container" class="options"></div>
+
+			<!-- Aviso sin selección -->
+			<div id="warning-box" class="warning-box hidden">
+				<p>⚠️ No has seleccionado ninguna respuesta. Si continúas, esta pregunta contará como <strong>fallo</strong>.</p>
+				<div class="warning-actions">
+					<button id="btn-warning-back" class="btn btn-secondary btn-sm">Volver y responder</button>
+					<button id="btn-warning-confirm" class="btn btn-danger btn-sm">Continuar sin responder</button>
+				</div>
+			</div>
+
+			<button id="btn-next" class="btn btn-primary">Siguiente</button>
+		</div>
+	</div>
+
+	<!-- PANTALLA 3: Feedback por pregunta -->
+	<div id="screen-feedback" class="screen">
+		<div class="card">
+			<p id="question-counter-feedback" class="counter">Pregunta 1 de 10</p>
+			<div id="feedback-icon" class="feedback-icon"></div>
+			<h2 id="feedback-title" class="feedback-title"></h2>
+			<p id="feedback-question" class="feedback-question-text"></p>
+			<div id="feedback-answers" class="feedback-answers"></div>
+			<button id="btn-next-question" class="btn btn-primary">Siguiente pregunta</button>
+		</div>
+	</div>
+
+	<!-- PANTALLA 4: Resultado -->
+	<div id="screen-result" class="screen">
+		<div class="card">
+			<img src="assets/logo.png" alt="Logo Iker" class="logo logo-sm">
+			<div id="result-icon" class="result-icon"></div>
+			<h2 id="result-title" class="result-title"></h2>
+			<p id="result-score" class="result-score"></p>
+			<p id="result-message" class="result-message"></p>
+
+			<!-- Premio (primera victoria) -->
+			<div id="prize-box" class="prize-box hidden">
+				<p class="prize-label">Tu código de premio:</p>
+				<div class="code-wrap">
+					<span id="discount-code" class="discount-code"></span>
+					<button id="btn-copy" class="btn-copy" title="Copiar código">
+						<span id="copy-label">Copiar</span>
+					</button>
+				</div>
+			</div>
+
+			<div class="result-actions">
+				<button id="btn-review" class="btn btn-secondary hidden">Ver todas las preguntas</button>
+				<button id="btn-retry" class="btn btn-primary">Intentar de nuevo</button>
+			</div>
+		</div>
+	</div>
+
+	<!-- PANTALLA 5: Revisión de las 50 preguntas -->
+	<div id="screen-review" class="screen">
+		<div class="card card-wide">
+			<button id="btn-back-result" class="btn-back">← Volver al resultado</button>
+			<h2 class="review-title">Todas las preguntas</h2>
+			<p class="review-subtitle">Las respuestas correctas están marcadas en verde.</p>
+			<div id="review-list" class="review-list"></div>
+		</div>
+	</div>
+
+	<script>
+		window.PRIZE_CODE = null;
+		window.QUIZ_QUESTIONS_COUNT = null;
+		window.QUIZ_MIN_CORRECT = null;
+	</script>
+	<script src="config.js"></script>
+	<script src="quiz.js?v=3"></script>
+
+	<!-- Modales de bienvenida (broma) -->
+	<script>
+		(function () {
+			function crearModal(contenido) {
+				var overlay = document.createElement('div');
+				overlay.className = 'modal-overlay';
+				overlay.innerHTML = contenido;
+				document.body.appendChild(overlay);
+				return overlay;
+			}
+
+			function mostrarModalPartner() {
+				var html = '<div class="modal-box">'
+					+ '<p class="modal-badge">🤝 Programa de partners</p>'
+					+ '<h2 class="modal-title">¡Enhorabuena! Eres partner oficial</h2>'
+					+ '<p class="modal-body">Como usuario registrado de este quiz, tienes acceso a tu <strong>código de partner exclusivo</strong>. Compártelo con amigos, familiares, compañeros de trabajo y cualquier persona que soporte bien la presión social.</p>'
+					+ '<p class="modal-body">Por cada persona que uses tu código… no recibirás absolutamente nada. Pero tendrás la satisfacción moral de haberlo intentado.</p>'
+					+ '<div class="modal-partner-code">'
+					+ '<span class="modal-partner-code-label">Tu código personal</span>'
+					+ '<div class="modal-partner-code-wrap">'
+					+ '<span class="modal-partner-code-value">IKER-RECLUTAS</span>'
+					+ '<button id="btn-partner-copy" class="btn-copy">Copiar</button>'
+					+ '</div>'
+					+ '</div>'
+					+ '<div class="modal-actions modal-actions--center">'
+					+ '<button id="btn-partner-ok" class="btn btn-primary">Entendido, lo compartiré</button>'
+					+ '</div>'
+					+ '</div>';
+
+				var overlay = crearModal(html);
+
+				function cerrar() {
+					overlay.classList.add('modal-out');
+					setTimeout(function () { overlay.remove(); }, 300);
+				}
+
+				overlay.querySelector('#btn-partner-copy').addEventListener('click', function () {
+					navigator.clipboard.writeText('IKER-RECLUTAS').catch(function () {});
+					var btn = overlay.querySelector('#btn-partner-copy');
+					btn.textContent = '¡Copiado!';
+					btn.classList.add('copied');
+					setTimeout(function () {
+						btn.textContent = 'Copiar';
+						btn.classList.remove('copied');
+					}, 2000);
+				});
+
+				overlay.querySelector('#btn-partner-ok').addEventListener('click', cerrar);
+			}
+
+			function mostrarModalCookies() {
+				var html = '<div class="modal-box">'
+					+ '<p class="modal-badge">🍪 Aviso de cookies</p>'
+					+ '<h2 class="modal-title">Usamos cookies</h2>'
+					+ '<p class="modal-body">Utilizamos cookies propias, de terceros, de mantequilla, de chocolate y de galleta maría para mejorar tu experiencia. También las compartimos con socios, amigos, conocidos, y básicamente cualquiera que pregunte.</p>'
+					+ '<p class="modal-body">Si no aceptas las cookies <strong>no podemos garantizar nada</strong>. Ni el quiz, ni tu futuro profesional, ni tus vacaciones de verano.</p>'
+					+ '<div class="modal-actions modal-actions--center">'
+					+ '<button id="btn-cookies-reject" class="btn btn-secondary btn-sm">Rechazar todo (igual te las ponemos)</button>'
+					+ '<button id="btn-cookies-accept" class="btn btn-primary">Aceptar todas las cookies</button>'
+					+ '</div>'
+					+ '</div>';
+
+				var overlay = crearModal(html);
+
+				function cerrar() {
+					overlay.classList.add('modal-out');
+					setTimeout(function () {
+						overlay.remove();
+						mostrarModalPartner();
+					}, 300);
+				}
+
+				overlay.querySelector('#btn-cookies-accept').addEventListener('click', cerrar);
+				overlay.querySelector('#btn-cookies-reject').addEventListener('click', cerrar);
+			}
+
+			mostrarModalCookies();
+		})();
+	</script>
+
+	<!-- Selector de tema: solo visible en localhost -->
+	<script>
+		(function () {
+			if (!['localhost', '127.0.0.1', ''].includes(location.hostname)) return;
+
+			var THEMES = [
+				{ value: 'default',    label: '⚡ Default' },
+				{ value: 'grand-prix', label: '🏖️ Grand Prix' },
+				{ value: 'nintendo',   label: '🎮 Nintendo' },
+				{ value: 'fifa',       label: '⚽ FIFA' }
+			];
+
+			var current = new URLSearchParams(location.search).get('theme') || 'default';
+
+			var wrap = document.createElement('div');
+			Object.assign(wrap.style, {
+				position: 'fixed', bottom: '16px', right: '16px', zIndex: '9999',
+				display: 'flex', alignItems: 'center', gap: '8px',
+				background: '#1e1e1e', borderRadius: '10px',
+				padding: '8px 12px',
+				boxShadow: '0 4px 16px rgba(0,0,0,0.4)',
+				fontFamily: 'system-ui, sans-serif'
+			});
+
+			var label = document.createElement('span');
+			label.textContent = '🎨';
+			Object.assign(label.style, { fontSize: '16px', lineHeight: '1' });
+
+			var select = document.createElement('select');
+			Object.assign(select.style, {
+				background: '#2d2d2d', color: '#fff', border: '1px solid #444',
+				borderRadius: '6px', padding: '5px 8px', fontSize: '13px',
+				fontWeight: '600', cursor: 'pointer', outline: 'none'
+			});
+
+			THEMES.forEach(function (t) {
+				var opt = document.createElement('option');
+				opt.value = t.value;
+				opt.textContent = t.label;
+				if (t.value === current) opt.selected = true;
+				select.appendChild(opt);
+			});
+
+			select.addEventListener('change', function () {
+				var params = new URLSearchParams(location.search);
+				params.set('theme', select.value);
+				location.search = params.toString();
+			});
+
+			wrap.appendChild(label);
+			wrap.appendChild(select);
+			document.body.appendChild(wrap);
+		})();
+	</script>
+</body>
+</html>

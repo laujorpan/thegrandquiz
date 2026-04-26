@@ -1,0 +1,415 @@
+@import url('https://fonts.googleapis.com/css2?family=Boogaloo&family=Nunito:wght@400;600;700;800&display=swap');
+
+/* ── El Grand Prix del Verano ───────────────────────────
+   Colores oficiales del programa: azul (#003DA5) + amarillo (#FFD600)
+   Tipografía: Boogaloo (redondeada, festiva, sin serifa)
+───────────────────────────────────────────────────────── */
+
+:root {
+	--accent:   #FFD600;
+	--dark:     #003DA5;
+	--light:    #E8F0FE;
+	--white:    #ffffff;
+	--success:  #16a34a;
+	--error:    #dc2626;
+	--radius:   16px;
+	--shadow:   0 6px 0 #002880, 0 10px 28px rgba(0,61,165,0.18);
+}
+
+body {
+	font-family: 'Nunito', sans-serif;
+	background: linear-gradient(180deg, #4A9FDC 0%, #6BB8E8 55%, #A0D4F0 100%) fixed;
+	color: #1e293b;
+	font-weight: 700;
+	position: relative;
+}
+
+/* ── Capa de nubes estilo videojuego ── */
+/* Cada nube = círculos superpuestos con borde duro (sin difuminado) */
+body::before,
+body::after {
+	content: '';
+	position: fixed;
+	inset: 0;
+	pointer-events: none;
+	z-index: 0;
+	background-repeat: repeat-x;
+	background-size: 1800px 100vh;
+}
+
+/* Capa 1: nubes grandes, deriva lenta */
+body::before {
+	background-image:
+		/* ── Nube 1 (izquierda) ── */
+		radial-gradient(circle at  200px 130px, white 50px, transparent 50px),
+		radial-gradient(circle at  155px 148px, white 38px, transparent 38px),
+		radial-gradient(circle at  245px 148px, white 42px, transparent 42px),
+		radial-gradient(circle at  290px 155px, white 30px, transparent 30px),
+		radial-gradient(circle at  115px 155px, white 28px, transparent 28px),
+
+		/* ── Nube 2 (derecha) ── */
+		radial-gradient(circle at 1200px  95px, white 55px, transparent 55px),
+		radial-gradient(circle at 1148px 115px, white 40px, transparent 40px),
+		radial-gradient(circle at 1255px 115px, white 45px, transparent 45px),
+		radial-gradient(circle at 1300px 122px, white 32px, transparent 32px),
+		radial-gradient(circle at 1108px 122px, white 26px, transparent 26px),
+
+		/* ── Nube 3 (centro) ── */
+		radial-gradient(circle at  780px 200px, white 38px, transparent 38px),
+		radial-gradient(circle at  742px 215px, white 28px, transparent 28px),
+		radial-gradient(circle at  822px 215px, white 30px, transparent 30px),
+		radial-gradient(circle at  855px 220px, white 22px, transparent 22px),
+		radial-gradient(circle at  710px 220px, white 20px, transparent 20px);
+	animation: gp-drift-slow 80s linear infinite;
+}
+
+/* Capa 2: nubes pequeñas, deriva ligeramente más rápida */
+body::after {
+	background-image:
+		/* ── Nube A (pequeña, alto-izquierda) ── */
+		radial-gradient(circle at  480px  80px, white 28px, transparent 28px),
+		radial-gradient(circle at  452px  94px, white 20px, transparent 20px),
+		radial-gradient(circle at  510px  94px, white 22px, transparent 22px),
+		radial-gradient(circle at  534px  99px, white 16px, transparent 16px),
+
+		/* ── Nube B (pequeña, alto-derecha) ── */
+		radial-gradient(circle at 1500px 110px, white 32px, transparent 32px),
+		radial-gradient(circle at 1468px 124px, white 22px, transparent 22px),
+		radial-gradient(circle at 1534px 124px, white 26px, transparent 26px),
+		radial-gradient(circle at 1558px 130px, white 18px, transparent 18px),
+
+		/* ── Nube C (mediana, bajo-centro) ── */
+		radial-gradient(circle at  960px 260px, white 24px, transparent 24px),
+		radial-gradient(circle at  934px 272px, white 18px, transparent 18px),
+		radial-gradient(circle at  988px 272px, white 20px, transparent 20px);
+	animation: gp-drift-fast 55s linear infinite;
+}
+
+@keyframes gp-drift-slow {
+	from { background-position: 0 0; }
+	to   { background-position: 1800px 0; }
+}
+@keyframes gp-drift-fast {
+	from { background-position: 0 0; }
+	to   { background-position: 1800px 0; }
+}
+
+/* Las pantallas flotan por encima del cielo */
+.screen {
+	position: relative;
+	z-index: 1;
+}
+
+/* ── Card ── */
+.card {
+	background: #ffffff;
+	border-radius: 20px;
+	border: 4px solid #FFD600;
+	box-shadow:
+		0 6px 0 #b89a00,
+		0 12px 32px rgba(0,0,0,0.25);
+	overflow: visible;
+	position: relative;
+}
+
+/* Franja amarilla + azul en la parte superior */
+.card::before {
+	content: '';
+	display: block;
+	height: 10px;
+	background: linear-gradient(90deg,
+		#FFD600 0%, #FFD600 50%,
+		#003DA5 50%, #003DA5 100%
+	);
+	border-radius: 16px 16px 0 0;
+	margin: -40px -36px 20px -36px;
+}
+
+/* ── Títulos ── */
+.title {
+	font-family: 'Boogaloo', cursive;
+	font-size: 2.6rem;
+	font-weight: 400;
+	color: #003DA5;
+	text-align: center;
+	line-height: 1.15;
+	letter-spacing: 0.01em;
+	text-shadow: 3px 3px 0 rgba(0,61,165,0.12);
+}
+
+.subtitle {
+	font-family: 'Nunito', sans-serif;
+	font-size: 1rem;
+	color: #475569;
+	line-height: 1.6;
+	font-weight: 600;
+}
+
+/* ── Botones ── */
+.btn {
+	font-family: 'Boogaloo', cursive;
+	font-size: 1.2rem;
+	font-weight: 400;
+	border-radius: 14px;
+	letter-spacing: 0.01em;
+	transition: transform 0.1s, box-shadow 0.1s;
+}
+
+.btn-primary {
+	background: #FFD600;
+	color: #003DA5;
+	border: none;
+	box-shadow: 0 5px 0 #b89a00;
+}
+.btn-primary:hover {
+	opacity: 1;
+	transform: translateY(-2px);
+	box-shadow: 0 7px 0 #b89a00;
+}
+.btn-primary:active {
+	transform: translateY(3px);
+	box-shadow: 0 2px 0 #b89a00;
+}
+
+.btn-secondary {
+	background: #EEF2FF;
+	color: #003DA5;
+	border: 2px solid #c7d7f8;
+	box-shadow: 0 4px 0 #c7d7f8;
+}
+.btn-secondary:hover {
+	border-color: #003DA5;
+	background: #dce8ff;
+}
+
+.btn-danger {
+	background: #dc2626;
+	color: #fff;
+	box-shadow: 0 4px 0 #991b1b;
+}
+
+.btn-back {
+	font-family: 'Nunito', sans-serif;
+	font-weight: 700;
+	color: #64748b;
+	font-size: 0.9rem;
+}
+.btn-back:hover { color: #003DA5; }
+
+/* ── Barra de progreso ── */
+.progress-bar-wrap {
+	background: #dce8ff;
+	border-radius: 99px;
+	height: 12px;
+	overflow: hidden;
+	border: 2px solid #c7d7f8;
+}
+.progress-bar {
+	background: linear-gradient(90deg, #FFD600 0%, #ffe84d 50%, #FFD600 100%);
+	background-size: 200% 100%;
+	animation: gp-shimmer 1.8s linear infinite;
+	border-radius: 99px;
+}
+@keyframes gp-shimmer {
+	0%   { background-position: 200% 0; }
+	100% { background-position: -200% 0; }
+}
+
+/* ── Contador ── */
+.counter {
+	font-family: 'Boogaloo', cursive;
+	font-size: 1rem;
+	color: #003DA5;
+	font-weight: 400;
+	letter-spacing: 0.02em;
+}
+
+/* ── Texto de pregunta ── */
+.question-text {
+	font-family: 'Boogaloo', cursive;
+	font-size: 1.4rem;
+	color: #1e293b;
+	line-height: 1.45;
+	font-weight: 400;
+}
+
+.hint {
+	font-family: 'Nunito', sans-serif;
+	font-size: 0.8rem;
+	color: #94a3b8;
+	font-weight: 600;
+}
+
+/* ── Opciones ── */
+.option-label {
+	border: 3px solid #e2e8f0;
+	border-radius: 14px;
+	background: #f8fafc;
+	color: #1e293b;
+	font-family: 'Nunito', sans-serif;
+	font-size: 0.95rem;
+	font-weight: 700;
+}
+.option-label:hover {
+	border-color: #FFD600;
+	background: #fffef0;
+}
+.option-label.selected {
+	border-color: #003DA5;
+	background: #EEF2FF;
+}
+.option-label input[type="checkbox"] {
+	accent-color: #003DA5;
+}
+
+/* ── Feedback ── */
+.feedback-title {
+	font-family: 'Boogaloo', cursive;
+	font-size: 1.7rem;
+	font-weight: 400;
+}
+.feedback-title.correct  { color: #16a34a; }
+.feedback-title.incorrect { color: #dc2626; }
+
+.feedback-question-text {
+	font-family: 'Nunito', sans-serif;
+	font-size: 0.9rem;
+	color: #64748b;
+	font-style: normal;
+	font-weight: 600;
+	line-height: 1.6;
+}
+
+.feedback-option {
+	font-family: 'Nunito', sans-serif;
+	font-size: 0.9rem;
+	font-weight: 700;
+	border-radius: 10px;
+}
+.feedback-option.correct-answer {
+	background: #dcfce7;
+	border-color: #16a34a;
+	color: #14532d;
+}
+.feedback-option.wrong-selected {
+	background: #fee2e2;
+	border-color: #dc2626;
+	color: #7f1d1d;
+}
+.feedback-option.neutral {
+	background: #f1f5f9;
+	border-color: #e2e8f0;
+	color: #94a3b8;
+}
+.correct-answer .badge { background: #16a34a; color: #fff; }
+.wrong-selected .badge { background: #dc2626; color: #fff; }
+
+/* ── Resultado ── */
+.result-title {
+	font-family: 'Boogaloo', cursive;
+	font-size: 1.9rem;
+	font-weight: 400;
+	color: #003DA5;
+}
+.result-score {
+	font-family: 'Boogaloo', cursive;
+	font-weight: 400;
+	font-size: 3.2rem;
+	color: #003DA5;
+	text-shadow: 3px 3px 0 rgba(0,61,165,0.15);
+}
+.result-message {
+	font-family: 'Nunito', sans-serif;
+	font-size: 1rem;
+	color: #475569;
+	font-weight: 600;
+	line-height: 1.6;
+}
+
+/* ── Premio ── */
+.prize-box {
+	background: #fffef0;
+	border: 3px solid #FFD600;
+	border-radius: 16px;
+	box-shadow: 0 4px 0 #b89a00;
+}
+.prize-label {
+	font-family: 'Boogaloo', cursive;
+	font-size: 0.95rem;
+	color: #7a6200;
+	font-weight: 400;
+	letter-spacing: 0.04em;
+}
+.discount-code {
+	background: #FFD600;
+	color: #003DA5;
+	font-family: 'Boogaloo', cursive;
+	font-size: 1.9rem;
+	font-weight: 400;
+	border-radius: 10px;
+	letter-spacing: 0.12em;
+}
+.btn-copy {
+	background: #003DA5;
+	color: #FFD600;
+	border-radius: 10px;
+	border: none;
+	font-family: 'Boogaloo', cursive;
+	font-size: 0.9rem;
+	font-weight: 400;
+}
+.btn-copy:hover { opacity: 0.85; }
+.btn-copy.copied { background: #16a34a; color: #fff; }
+
+/* ── Revisión ── */
+.review-title {
+	font-family: 'Boogaloo', cursive;
+	font-size: 1.7rem;
+	color: #003DA5;
+	font-weight: 400;
+}
+.review-subtitle {
+	font-family: 'Nunito', sans-serif;
+	font-size: 0.85rem;
+	color: #94a3b8;
+	font-weight: 600;
+}
+.review-item {
+	border: 3px solid #e2e8f0;
+	border-radius: 14px;
+}
+.review-item-header {
+	background: linear-gradient(90deg, #003DA5 60%, #002880 100%);
+	color: #FFD600;
+	font-family: 'Boogaloo', cursive;
+	font-size: 0.8rem;
+	font-weight: 400;
+	letter-spacing: 0.04em;
+}
+.review-item-question {
+	font-family: 'Nunito', sans-serif;
+	font-weight: 800;
+	color: #1e293b;
+	font-size: 0.95rem;
+}
+.review-option {
+	font-family: 'Nunito', sans-serif;
+	font-size: 0.88rem;
+	font-weight: 600;
+	color: #64748b;
+}
+.review-option.is-correct {
+	background: #dcfce7;
+	color: #14532d;
+}
+
+/* ── Warning ── */
+.warning-box {
+	background: #fffef0;
+	border: 3px solid #FFD600;
+	border-radius: 14px;
+	font-family: 'Nunito', sans-serif;
+	font-size: 0.9rem;
+	font-weight: 700;
+	color: #7a6200;
+}

@@ -1,0 +1,51 @@
+id;question;option_a;option_b;option_c;option_d;correct
+1;¿Cuántos días tiene una semana?;5;7;10;12;B
+2;¿De qué color es el cielo en un día despejado?;Verde;Rojo;Azul;Amarillo;C
+3;¿Cuáles de las siguientes figuras tienen exactamente 4 lados?;Cuadrado;Triángulo;Rectángulo;Círculo;A,C
+4;¿Cuál es la capital de España?;Barcelona;Valencia;Sevilla;Madrid;D
+5;¿Cuántos meses tiene un año?;10;11;12;13;C
+6;¿Cuál es el resultado de 2 + 2?;3;4;5;6;B
+7;¿Qué animal hace "miau"?;Perro;Gato;Vaca;Pato;B
+8;¿Cuántos colores tiene el arcoíris?;5;6;7;8;C
+9;¿Cuáles de los siguientes países están en Europa?;España;México;Francia;Japón;A,C
+10;¿Cuántas patas tiene un perro?;2;3;4;6;C
+11;¿Cuál es el planeta más cercano al Sol?;Venus;Tierra;Marte;Mercurio;D
+12;¿De qué color es la hierba?;Azul;Rojo;Verde;Naranja;C
+13;¿Cuánto es 10 x 10?;10;50;100;1000;C
+14;¿Qué idioma se habla en México?;Portugués;Inglés;Francés;Español;D
+15;¿Cuántas horas tiene un día?;12;20;24;48;C
+16;¿Cuáles de las siguientes son frutas?;Manzana;Zanahoria;Plátano;Patata;A,C
+17;¿Cuál es el océano más grande del mundo?;Atlántico;Índico;Ártico;Pacífico;D
+18;¿Cuántos segundos tiene un minuto?;10;30;60;100;C
+19;¿Qué animal es el rey de la selva?;Tigre;Elefante;León;Gorila;C
+20;¿Cuántos jugadores tiene un equipo de fútbol en el campo?;9;10;11;12;C
+21;¿Cuáles de los siguientes son colores primarios de la luz?;Rojo;Verde;Azul;Naranja;A,B,C
+22;¿Qué planeta habitamos?;Marte;Venus;Saturno;Tierra;D
+23;¿Cuántos días tiene febrero en un año normal?;26;27;28;29;C
+24;¿Cuánto es 5 x 5?;20;25;30;35;B
+25;¿Qué animal vive en el agua y tiene aletas?;Serpiente;Águila;Pez;Camello;C
+26;¿Cuáles de los siguientes son planetas del sistema solar?;Marte;Luna;Saturno;Sol;A,C
+27;¿Cuántos continentes hay en la Tierra?;5;6;7;8;C
+28;¿Cuál es la moneda de Europa?;Dólar;Libra;Franco;Euro;D
+29;¿Qué órgano bombea la sangre?;Pulmón;Hígado;Corazón;Riñón;C
+30;¿Cuántos minutos tiene una hora?;30;45;60;90;C
+31;¿Cuál es el animal terrestre más rápido?;León;Caballo;Guepardo;Lobo;C
+32;¿Cuáles de los siguientes son instrumentos de cuerda?;Guitarra;Trompeta;Violín;Tambor;A,C
+33;¿Qué instrumento tiene teclas blancas y negras?;Guitarra;Violín;Piano;Flauta;C
+34;¿Cuánto es 100 ÷ 10?;5;8;10;20;C
+35;¿En qué estación del año caen las hojas de los árboles?;Primavera;Verano;Otoño;Invierno;C
+36;¿Cuál es el idioma más hablado en Brasil?;Español;Inglés;Portugués;Francés;C
+37;¿Cuáles de los siguientes son mamíferos?;Delfín;Serpiente;Ballena;Águila;A,C
+38;¿Qué necesitan las plantas para crecer?;Solo agua;Solo luz;Agua, luz y tierra;Solo tierra;C
+39;¿Cuánto es 3 x 3?;6;8;9;12;C
+40;¿Cuál es el hueso más largo del cuerpo humano?;Tibia;Columna;Húmero;Fémur;D
+41;¿Qué animal produce miel?;Mariposa;Mosca;Abeja;Hormiga;C
+42;¿Cuántos ojos tiene una persona normalmente?;1;2;3;4;B
+43;¿Cuáles de las siguientes son estaciones del año?;Primavera;Medianoche;Verano;Amanecer;A,C
+44;¿Cuál es el resultado de 50 + 50?;90;95;100;110;C
+45;¿Qué sentido usamos para oír?;Vista;Olfato;Tacto;Oído;D
+46;¿De qué color es una zanahoria?;Rojo;Amarillo;Naranja;Verde;C
+47;¿Cuáles de los siguientes son medios de transporte?;Avión;Silla;Tren;Mesa;A,C
+48;¿Qué gas respiramos principalmente?;Hidrógeno;Dióxido de carbono;Oxígeno;Nitrógeno;C
+49;¿Cuál es la montaña más alta del mundo?;K2;Kilimanjaro;Mont Blanc;Everest;D
+50;¿Cuáles de los siguientes son sentidos del cuerpo humano?;Vista;Pensamiento;Oído;Sueño;A,C

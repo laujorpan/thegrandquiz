@@ -1,0 +1,209 @@
+@import url('https://fonts.googleapis.com/css2?family=Open+Sans:wght@300;400;600;700;800&display=swap');
+
+/* ── Variables (Darwinex Zero — s-zerolight rebrand) ── */
+:root {
+	--accent:       #d8f937;
+	--accent-hover: #c2e031;
+	--accent-light: #effdaf;
+	--dark:         #1e1727;
+	--text-body:    #414b5f;
+	--text-muted:   #717887;
+	--light:        #ffffff;
+	--bg-subtle:    #f8f8f8;
+	--border:       #eeeeee;
+	--white:        #ffffff;
+	--success:      #5b8000;
+	--success-bg:   #e9fac7;
+	--error:        #ba3232;
+	--error-bg:     #fbc2c2;
+	--warning:      #f2a007;
+	--warning-bg:   #f7deb0;
+	--radius:       12px;
+	--shadow:       0px 0px 16px 0px rgba(0, 0, 0, 0.15);
+}
+
+/* ── Body ── */
+body {
+	font-family: 'Open Sans', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+	background: var(--light);
+	color: var(--text-body);
+}
+
+/* ── Títulos ── */
+.title {
+	font-size: 1.9rem;
+	font-weight: 800;
+	letter-spacing: -0.02em;
+	color: var(--dark);
+}
+.subtitle {
+	color: var(--text-muted);
+	font-weight: 400;
+}
+.question-text {
+	font-weight: 700;
+	color: var(--dark);
+}
+.counter {
+	font-weight: 600;
+	color: var(--text-muted);
+	letter-spacing: 0.05em;
+}
+.hint {
+	color: var(--text-muted);
+}
+
+/* ── Card ── */
+.card {
+	background: var(--white);
+	border: 1px solid var(--border);
+	box-shadow: var(--shadow);
+}
+
+/* ── Barra de progreso ── */
+.progress-bar-wrap {
+	background: var(--border);
+}
+.progress-bar {
+	background: var(--accent);
+}
+
+/* ── Opciones ── */
+.option-label {
+	border-color: var(--border);
+	color: var(--text-body);
+}
+.option-label:hover {
+	border-color: var(--accent);
+	background: var(--accent-light);
+}
+.option-label input[type="checkbox"] {
+	accent-color: var(--dark);
+}
+.option-label.selected {
+	border-color: var(--dark);
+	background: var(--bg-subtle);
+}
+
+/* ── Aviso sin selección ── */
+.warning-box {
+	background: var(--warning-bg);
+	border-color: var(--warning);
+}
+
+/* ── Botones generales ── */
+.btn-primary {
+	background: var(--accent);
+	color: var(--dark);
+	font-weight: 700;
+}
+.btn-primary:hover {
+	background: var(--accent-hover);
+	opacity: 1;
+}
+.btn-secondary {
+	background: transparent;
+	color: var(--dark);
+	border: 2px solid var(--dark);
+}
+.btn-secondary:hover {
+	background: var(--dark);
+	color: var(--accent);
+	border-color: var(--dark);
+}
+.btn-back {
+	color: var(--text-muted);
+	font-weight: 600;
+}
+.btn-back:hover {
+	color: var(--dark);
+}
+
+/* ── Feedback ── */
+.feedback-title.correct {
+	color: var(--success);
+}
+.feedback-title.incorrect {
+	color: var(--error);
+}
+.feedback-question-text {
+	color: var(--text-muted);
+}
+.feedback-option.correct-answer {
+	background: var(--success-bg);
+	border-color: var(--success);
+	color: var(--success);
+}
+.feedback-option.wrong-selected {
+	background: var(--error-bg);
+	border-color: var(--error);
+	color: var(--error);
+}
+.feedback-option.neutral {
+	background: var(--bg-subtle);
+	border-color: var(--border);
+	color: var(--text-muted);
+}
+.correct-answer .badge {
+	background: var(--success);
+	color: var(--white);
+}
+.wrong-selected .badge {
+	background: var(--error);
+	color: var(--white);
+}
+
+/* ── Resultado ── */
+.result-score {
+	color: var(--dark);
+}
+.result-message {
+	color: var(--text-muted);
+}
+
+/* ── Premio ── */
+.prize-box {
+	background: var(--accent-light);
+	border-color: var(--accent);
+}
+.prize-label {
+	color: var(--text-muted);
+}
+.discount-code {
+	background: var(--accent);
+	color: var(--dark);
+	font-weight: 800;
+}
+.btn-copy {
+	background: var(--dark);
+	color: var(--accent);
+}
+.btn-copy:hover {
+	opacity: 0.85;
+}
+.btn-copy.copied {
+	background: var(--success);
+	color: var(--white);
+}
+
+/* ── Revisión ── */
+.review-subtitle {
+	color: var(--text-muted);
+}
+.review-item {
+	border-color: var(--border);
+}
+.review-item-header {
+	background: var(--dark);
+	color: var(--accent);
+}
+.review-item-question {
+	border-color: var(--border);
+}
+.review-option {
+	border-color: var(--bg-subtle);
+}
+.review-option.is-correct {
+	background: var(--success-bg);
+	color: var(--success);
+}
