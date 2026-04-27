@@ -595,3 +595,56 @@ body {
 		font-size: 1.2rem;
 	}
 }
+
+/* ── Captcha grid (4×3) ── */
+.captcha-grid {
+	display: grid;
+	grid-template-columns: repeat(4, 1fr);
+	gap: 10px;
+}
+
+.captcha-panel {
+	aspect-ratio: 1;
+	border: 2px solid #e5e7eb;
+	border-radius: var(--radius);
+	background: var(--white);
+	cursor: pointer;
+	transition: border-color 0.15s, background 0.15s, transform 0.1s;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	user-select: none;
+	overflow: hidden;
+	padding: 0;
+}
+
+.captcha-panel img {
+	width: 100%;
+	height: 100%;
+	object-fit: cover;
+	display: block;
+	pointer-events: none;
+}
+
+.captcha-panel:hover {
+	border-color: var(--accent);
+	background: #f9ffe6;
+}
+
+.captcha-panel.selected {
+	border-color: var(--dark);
+	box-shadow: inset 0 0 0 3px var(--accent);
+}
+
+.captcha-panel:active {
+	transform: scale(0.94);
+}
+
+@media (max-width: 480px) {
+	.captcha-grid {
+		gap: 8px;
+	}
+	.captcha-panel {
+		font-size: 1.1rem;
+	}
+}

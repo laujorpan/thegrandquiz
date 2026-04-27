@@ -6,6 +6,26 @@ const MIN_CORRECT     = window.QUIZ_MIN_CORRECT     || 9;
 const QUESTIONS_COUNT = window.QUIZ_QUESTIONS_COUNT || 10;
 const LS_KEY_WON      = 'ikerQuiz_hasWon';
 
+// ── Captchas ─────────────────────────────────────────────────
+// Cada entrada tiene su pregunta y el mensaje que se muestra al pulsar "Confirmar".
+// El usuario nunca puede avanzar: siempre se muestra el mensaje y se resetea el grid.
+const CAPTCHA_STEPS = [
+	{
+		question: 'Selecciona todos los cuadros que contengan un "Jota"',
+		message:  'Eso no parece correcto. Fíjate bien e inténtalo de nuevo.'
+	},
+	{
+		question: 'Ahora selecciona todos los cuadros que contengan un "Marc"',
+		message:  'Hmm, casi. Vuelve a intentarlo, esta vez con más cuidado.'
+	},
+	{
+		question: 'Venga, prueba a seleccionar todos los que NO contienen un Jota ni un Marc',
+		message:  'Ya, demasiado complicado. Bueno, no pasa nada. Haremos como que lo has hecho bien'
+	}
+];
+// Índice del captcha actual (0, 1, 2). Se gestiona fuera del flujo normal de preguntas.
+let captchaStep = 0;
+
 // ── Estado del juego ─────────────────────────────────────────
 let allQuestions   = [];   // pool completo del CSV
 let sessionQuestions = []; // 10 aleatorias de esta partida
@@ -53,6 +73,7 @@ function startGame() {
 	score = 0;
 	answers = [];
 	canSeeAllQuestions = false;
+	captchaStep = 0;
 	showQuestion();
 }
 
@@ -60,14 +81,43 @@ function startGame() {
 function showQuestion() {
 	const q = sessionQuestions[currentIndex];
 	const num = currentIndex + 1;
+	const total = sessionQuestions.length;
 
-	$('question-counter').textContent = `Pregunta ${num} de ${QUESTIONS_COUNT}`;
+	$('question-counter').textContent = `Pregunta ${num} de ${total}`;
 	$('question-text').textContent = q.question;
-	$('progress-bar').style.width = `${(num / QUESTIONS_COUNT) * 100}%`;
+	$('progress-bar').style.width = `${(num / total) * 100}%`;
 
-	// Limpiar y construir opciones
+	// Ocultar aviso
+	$('warning-box').classList.add('hidden');
+	$('btn-next').classList.remove('hidden');
+
+	renderStandardQuestion(q);
+	showScreen('screen-question');
+}
+
+// ── Mostrar captcha ───────────────────────────────────────────
+function showCaptcha() {
+	const step = CAPTCHA_STEPS[captchaStep];
+
+	// Ocultar barra de progreso y contador durante el captcha
+	$('question-counter').textContent = '🤖 Verificación de seguridad';
+	$('question-text').textContent = step.question;
+	$('progress-bar').style.width = '100%';
+
+	$('warning-box').classList.add('hidden');
+	$('btn-next').classList.remove('hidden');
+
+	renderCaptchaQuestion();
+	showScreen('screen-question');
+}
+
+// ── Pregunta estándar (checkboxes A/B/C/D) ───────────────────
+function renderStandardQuestion(q) {
+	$('hint-text').textContent = 'Selecciona todas las respuestas correctas';
+	$('btn-next').textContent = 'Siguiente';
 	const container = $('options-container');
 	container.innerHTML = '';
+	container.className = 'options';
 	const letters = ['A', 'B', 'C', 'D'];
 	q.options.forEach((opt, i) => {
 		const label = document.createElement('label');
@@ -82,26 +132,81 @@ function showQuestion() {
 		});
 		container.appendChild(label);
 	});
-
-	// Ocultar aviso
-	$('warning-box').classList.add('hidden');
-	$('btn-next').classList.remove('hidden');
-
-	showScreen('screen-question');
 }
 
-// ── Manejar "Siguiente" ──────────────────────────────────────
+// ── Pregunta tipo captcha (grid 4×3 de imágenes) ─────────────
+function renderCaptchaQuestion() {
+	$('hint-text').textContent = 'Selecciona los paneles correctos y pulsa Confirmar';
+	$('btn-next').textContent = 'Confirmar';
+	const container = $('options-container');
+	container.innerHTML = '';
+	container.className = 'captcha-grid';
+
+	const numbers = shuffle([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]);
+
+	numbers.forEach(num => {
+		const panel = document.createElement('button');
+		panel.type = 'button';
+		panel.className = 'captcha-panel';
+		panel.dataset.value = num;
+
+		const img = document.createElement('img');
+		img.src = `assets/captcha/panel-${num}.jpg`;
+		img.alt = `Panel ${num}`;
+		panel.appendChild(img);
+
+		panel.addEventListener('click', () => panel.classList.toggle('selected'));
+		container.appendChild(panel);
+	});
+}
+
+// ── Manejar "Siguiente" / "Confirmar" ───────────────────────
 function handleNext() {
+	// Si estamos en modo captcha, mostrar el mensaje de ese paso
+	if ($('btn-next').textContent === 'Confirmar') {
+		showCaptchaFailModal(CAPTCHA_STEPS[captchaStep].message);
+		return;
+	}
+
 	const selected = getSelected();
 
 	if (selected.length === 0) {
-		// Mostrar advertencia
 		$('warning-box').classList.remove('hidden');
 		$('btn-next').classList.add('hidden');
 		return;
 	}
 
 	processAnswer(selected);
+}
+
+// ── Modal de fallo del captcha ───────────────────────────────
+function showCaptchaFailModal(message) {
+	const overlay = document.createElement('div');
+	overlay.className = 'modal-overlay';
+	overlay.innerHTML = `
+		<div class="modal-box">
+			<p class="modal-badge">🤖 Verificación</p>
+			<h2 class="modal-title">Selección incorrecta</h2>
+			<p class="modal-body">${message}</p>
+			<div class="modal-actions modal-actions--center">
+				<button class="btn btn-primary">Intentar de nuevo</button>
+			</div>
+		</div>`;
+
+	document.body.appendChild(overlay);
+
+	overlay.querySelector('.btn').addEventListener('click', () => {
+		overlay.classList.add('modal-out');
+		setTimeout(() => {
+			overlay.remove();
+			captchaStep++;
+			if (captchaStep >= CAPTCHA_STEPS.length) {
+				showResult();
+			} else {
+				showCaptcha();
+			}
+		}, 300);
+	});
 }
 
 function getSelected() {
@@ -124,7 +229,7 @@ function processAnswer(selected) {
 	const q = sessionQuestions[currentIndex];
 	const correct = q.correct;
 
-	// Comparación exacta (set)
+	// Comparación exacta (set) — funciona tanto para letras como para números
 	const isCorrect =
 		selected.length === correct.length &&
 		selected.every(s => correct.includes(s));
@@ -145,7 +250,7 @@ function processAnswer(selected) {
 // ── Pantalla de feedback ─────────────────────────────────────
 function showFeedback(q, selected, correct, isCorrect) {
 	const num = currentIndex + 1;
-	$('question-counter-feedback').textContent = `Pregunta ${num} de ${QUESTIONS_COUNT}`;
+	$('question-counter-feedback').textContent = `Pregunta ${num} de ${sessionQuestions.length}`;
 	$('feedback-icon').textContent  = isCorrect ? '✅' : '❌';
 	$('feedback-title').textContent = isCorrect ? '¡Correcto!' : 'Incorrecto';
 	$('feedback-title').className   = `feedback-title ${isCorrect ? 'correct' : 'incorrect'}`;
@@ -164,7 +269,7 @@ function showFeedback(q, selected, correct, isCorrect) {
 
 	// Cambiar texto del botón en la última pregunta
 	$('btn-next-question').textContent =
-		currentIndex < QUESTIONS_COUNT - 1 ? 'Siguiente pregunta' : 'Ver resultado';
+		currentIndex < sessionQuestions.length - 1 ? 'Siguiente pregunta' : 'Ver resultado';
 
 	showScreen('screen-feedback');
 }
@@ -172,10 +277,12 @@ function showFeedback(q, selected, correct, isCorrect) {
 // ── Siguiente pregunta o resultado ───────────────────────────
 function nextQuestionOrResult() {
 	currentIndex++;
-	if (currentIndex < QUESTIONS_COUNT) {
+	if (currentIndex < sessionQuestions.length) {
 		showQuestion();
 	} else {
-		showResult();
+		// Preguntas normales terminadas → arrancar secuencia captcha
+		captchaStep = 0;
+		showCaptcha();
 	}
 }
 
