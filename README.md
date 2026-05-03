@@ -4,6 +4,8 @@ Juego de preguntas y respuestas de temática Darwinex. Edición especial _"Volv�
 
 Por defecto, 10 preguntas aleatorias por partida. Acierta 9 o más y ganas un premio. Ambos valores son configurables.
 
+El flujo actual de la partida es: inicio, captcha fake de 3 pasos, bloque de preguntas, resultado y revisión.
+
 ## Arranque local
 
 El quiz carga `questions.csv` mediante `fetch()`, así que debe servirse sobre HTTP:
@@ -36,4 +38,3 @@ cp config.example.js config.js
 El número total de preguntas disponibles se obtiene directamente de `questions.csv`, sin ningún valor fijo en el código.
 
 Si `config.js` no existe, el quiz funciona con los valores por defecto y muestra `[ CÓDIGO NO CONFIGURADO ]` si se gana.
-

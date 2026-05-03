@@ -74,7 +74,7 @@ function startGame() {
 	answers = [];
 	canSeeAllQuestions = false;
 	captchaStep = 0;
-	showQuestion();
+	showCaptcha();
 }
 
 // ── Mostrar pregunta ─────────────────────────────────────────
@@ -201,7 +201,7 @@ function showCaptchaFailModal(message) {
 			overlay.remove();
 			captchaStep++;
 			if (captchaStep >= CAPTCHA_STEPS.length) {
-				showResult();
+				showQuestion();
 			} else {
 				showCaptcha();
 			}
@@ -280,9 +280,8 @@ function nextQuestionOrResult() {
 	if (currentIndex < sessionQuestions.length) {
 		showQuestion();
 	} else {
-		// Preguntas normales terminadas → arrancar secuencia captcha
-		captchaStep = 0;
-		showCaptcha();
+		// Preguntas normales terminadas → mostrar resultado
+		showResult();
 	}
 }
 
