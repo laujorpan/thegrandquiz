@@ -239,9 +239,10 @@ body {
 }
 
 /* ── Resultado ── */
-.result-icon {
-	font-size: 3.5rem;
-	text-align: center;
+.result-logo {
+	align-self: center;
+	width: min(220px, 48vw);
+	height: auto;
 }
 .result-title {
 	font-size: 1.6rem;
@@ -587,6 +588,9 @@ body {
 	}
 	.question-text {
 		font-size: 1.05rem;
+	}
+	.result-logo {
+		width: min(180px, 52vw);
 	}
 	.result-score {
 		font-size: 2rem;

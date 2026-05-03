@@ -289,11 +289,13 @@ function nextQuestionOrResult() {
 function showResult() {
 	const won        = score >= MIN_CORRECT;
 	const hasWonBefore = localStorage.getItem(LS_KEY_WON) === 'true';
+	const resultLogo = $('result-logo');
 
 	$('result-score').textContent = `${score} / ${QUESTIONS_COUNT}`;
 
 	if (won) {
-		$('result-icon').textContent  = '🏆';
+		resultLogo.src = 'assets/logowinner.png';
+		resultLogo.alt = 'Logo ganador';
 		$('result-title').textContent = '¡Lo conseguiste!';
 
 		if (!hasWonBefore) {
@@ -308,7 +310,8 @@ function showResult() {
 			$('prize-box').classList.add('hidden');
 		}
 	} else {
-		$('result-icon').textContent  = '😓';
+		resultLogo.src = 'assets/logolooser.png';
+		resultLogo.alt = 'Logo perdedor';
 		$('result-title').textContent = 'Casi lo consigues...';
 		$('result-message').textContent =
 			`Has acertado ${score} de ${QUESTIONS_COUNT}. Necesitas al menos ${MIN_CORRECT} para ganar. ¡Vuelve a intentarlo!`;
