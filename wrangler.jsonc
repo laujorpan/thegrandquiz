@@ -1,0 +1,28 @@
+{
+	"$schema": "node_modules/wrangler/config-schema.json",
+	"name": "thegrandquiz",
+	"main": "worker.js",
+	"compatibility_date": "2026-05-04",
+	"assets": {
+		"directory": ".",
+		"binding": "ASSETS",
+		"run_worker_first": true
+	},
+	"vars": {
+		"QUESTIONS_KV_KEY": "questions",
+		"QUIZ_QUESTIONS_COUNT": "10",
+		"QUIZ_MIN_CORRECT": "9"
+	},
+	"kv_namespaces": [
+		{
+			"binding": "QUESTIONS_KV",
+			"id": "REPLACE_WITH_QUESTIONS_KV_ID",
+			"preview_id": "REPLACE_WITH_QUESTIONS_KV_PREVIEW_ID"
+		},
+		{
+			"binding": "QUIZ_SESSIONS",
+			"id": "REPLACE_WITH_SESSIONS_KV_ID",
+			"preview_id": "REPLACE_WITH_SESSIONS_KV_PREVIEW_ID"
+		}
+	]
+}

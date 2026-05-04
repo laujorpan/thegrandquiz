@@ -1,10 +1,10 @@
- 'use strict';
+'use strict';
 
 // ── Configuración ────────────────────────────────────────────
-const DISCOUNT_CODE   = window.PRIZE_CODE || '[ CÓDIGO NO CONFIGURADO ]';
-const MIN_CORRECT     = window.QUIZ_MIN_CORRECT     || 9;
-const QUESTIONS_COUNT = window.QUIZ_QUESTIONS_COUNT || 10;
-const LS_KEY_WON      = 'ikerQuiz_hasWon';
+const LS_KEY_WON = 'ikerQuiz_hasWon';
+const STATIC_DISCOUNT_CODE = window.PRIZE_CODE || '[ CÓDIGO NO CONFIGURADO ]';
+const STATIC_MIN_CORRECT = window.QUIZ_MIN_CORRECT || 9;
+const STATIC_QUESTIONS_COUNT = window.QUIZ_QUESTIONS_COUNT || 10;
 
 // ── Captchas ─────────────────────────────────────────────────
 // Cada entrada tiene su pregunta y el mensaje que se muestra al pulsar "Confirmar".
@@ -23,16 +23,19 @@ const CAPTCHA_STEPS = [
 		message:  'Ya, demasiado complicado. Bueno, no pasa nada. Haremos como que lo has hecho bien'
 	}
 ];
-// Índice del captcha actual (0, 1, 2). Se gestiona fuera del flujo normal de preguntas.
-let captchaStep = 0;
 
 // ── Estado del juego ─────────────────────────────────────────
-let allQuestions   = [];   // pool completo del CSV
-let sessionQuestions = []; // 10 aleatorias de esta partida
-let currentIndex   = 0;
-let score          = 0;
-let answers        = [];   // {question, selected[], correct[], isCorrect}
+let sessionId = null;
+let runtimeMode = 'worker';
+let allQuestions = [];
+let sessionQuestions = [];
+let currentIndex = 0;
+let score = 0;
+let answers = [];
+let reviewItems = [];
 let canSeeAllQuestions = false;
+let quizConfig = { questionsCount: 10, minCorrect: 9 };
+let captchaStep = 0;
 
 // ── Utilidades DOM ───────────────────────────────────────────
 function $(id) { return document.getElementById(id); }
@@ -43,38 +46,95 @@ function showScreen(id) {
 	window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
-// ── Parseo CSV ───────────────────────────────────────────────
+function setButtonBusy(button, isBusy, busyText) {
+	if (!button) return;
+	if (isBusy) {
+		button.dataset.originalText = button.textContent;
+		button.textContent = busyText;
+		button.disabled = true;
+	} else {
+		button.textContent = button.dataset.originalText || button.textContent;
+		button.disabled = false;
+		delete button.dataset.originalText;
+	}
+}
+
+function showFatalError(message) {
+	document.body.innerHTML = `
+		<div style="font-family:system-ui;padding:40px;max-width:600px;margin:auto;text-align:center;">
+			<h2 style="color:#ef4444;">Error al cargar el quiz</h2>
+			<p style="margin-top:12px;color:#555;">${escapeHTML(message)}</p>
+			<p style="margin-top:8px;color:#888;font-size:0.85rem;">Asegúrate de servir el proyecto por HTTP: <code>npx wrangler dev</code> para modo seguro o <code>npx http-server . -p 8000</code> para modo estático.</p>
+		</div>`;
+}
+
+// ── Parseo CSV para fallback estático ────────────────────────
 function parseCSV(text) {
-	const lines = text.trim().split('\n');
-	// Saltar cabecera
+	const lines = text.trim().split(/\r?\n/);
 	return lines.slice(1).map(line => {
 		const parts = line.split(';').map(p => p.trim());
 		if (parts.length < 7) return null;
-		const [id, question, option_a, option_b, option_c, option_d, correctRaw] = parts;
+		const [id, question, optionA, optionB, optionC, optionD, correctRaw] = parts;
 		const correct = correctRaw.split(',').map(c => c.trim().toUpperCase());
-		return { id, question, options: [option_a, option_b, option_c, option_d], correct };
+		return { id, question, options: [optionA, optionB, optionC, optionD], correct };
 	}).filter(Boolean);
 }
 
-// ── Fisher-Yates shuffle ─────────────────────────────────────
-function shuffle(arr) {
-	const a = [...arr];
-	for (let i = a.length - 1; i > 0; i--) {
-		const j = Math.floor(Math.random() * (i + 1));
-		[a[i], a[j]] = [a[j], a[i]];
+async function apiRequest(path, options = {}) {
+	const response = await fetch(path, {
+		headers: {
+			'Content-Type': 'application/json',
+			...(options.headers || {})
+		},
+		...options
+	});
+
+	let data = null;
+	try {
+		data = await response.json();
+	} catch (err) {
+		if (!response.ok) throw new Error(`Respuesta inesperada del servidor (${response.status})`);
 	}
-	return a;
+
+	if (!response.ok) {
+		throw new Error((data && data.error) || `Error del servidor (${response.status})`);
+	}
+
+	return data;
 }
 
 // ── Inicio del juego ─────────────────────────────────────────
-function startGame() {
-	sessionQuestions = shuffle(allQuestions).slice(0, QUESTIONS_COUNT);
-	currentIndex = 0;
-	score = 0;
-	answers = [];
-	canSeeAllQuestions = false;
-	captchaStep = 0;
-	showCaptcha();
+async function startGame() {
+	setButtonBusy($('btn-start'), true, 'Preparando...');
+	setButtonBusy($('btn-retry'), true, 'Preparando...');
+
+	try {
+		if (runtimeMode === 'worker') {
+			const data = await apiRequest('/api/session/start', { method: 'POST' });
+			sessionId = data.sessionId;
+			sessionQuestions = data.questions;
+			quizConfig = {
+				questionsCount: data.questionsCount,
+				minCorrect: data.minCorrect
+			};
+		} else {
+			sessionId = null;
+			sessionQuestions = shuffle(allQuestions).slice(0, quizConfig.questionsCount);
+		}
+
+		currentIndex = 0;
+		score = 0;
+		answers = [];
+		reviewItems = [];
+		canSeeAllQuestions = false;
+		captchaStep = 0;
+		showCaptcha();
+	} catch (err) {
+		showFatalError(err.message);
+	} finally {
+		setButtonBusy($('btn-start'), false);
+		setButtonBusy($('btn-retry'), false);
+	}
 }
 
 // ── Mostrar pregunta ─────────────────────────────────────────
@@ -87,7 +147,6 @@ function showQuestion() {
 	$('question-text').textContent = q.question;
 	$('progress-bar').style.width = `${(num / total) * 100}%`;
 
-	// Ocultar aviso
 	$('warning-box').classList.add('hidden');
 	$('btn-next').classList.remove('hidden');
 
@@ -99,7 +158,6 @@ function showQuestion() {
 function showCaptcha() {
 	const step = CAPTCHA_STEPS[captchaStep];
 
-	// Ocultar barra de progreso y contador durante el captcha
 	$('question-counter').textContent = '🤖 Verificación de seguridad';
 	$('question-text').textContent = step.question;
 	$('progress-bar').style.width = '100%';
@@ -115,6 +173,7 @@ function showCaptcha() {
 function renderStandardQuestion(q) {
 	$('hint-text').textContent = 'Selecciona todas las respuestas correctas';
 	$('btn-next').textContent = 'Siguiente';
+	$('btn-next').disabled = false;
 	const container = $('options-container');
 	container.innerHTML = '';
 	container.className = 'options';
@@ -138,6 +197,7 @@ function renderStandardQuestion(q) {
 function renderCaptchaQuestion() {
 	$('hint-text').textContent = 'Selecciona los paneles correctos y pulsa Confirmar';
 	$('btn-next').textContent = 'Confirmar';
+	$('btn-next').disabled = false;
 	const container = $('options-container');
 	container.innerHTML = '';
 	container.className = 'captcha-grid';
@@ -160,9 +220,30 @@ function renderCaptchaQuestion() {
 	});
 }
 
+// ── Fisher-Yates shuffle ─────────────────────────────────────
+function shuffle(arr) {
+	const a = [...arr];
+	for (let i = a.length - 1; i > 0; i--) {
+		const j = Math.floor(Math.random() * (i + 1));
+		[a[i], a[j]] = [a[j], a[i]];
+	}
+	return a;
+}
+
+function normalizeAnswers(values) {
+	if (!Array.isArray(values)) return [];
+	return [...new Set(values.map(value => String(value).trim().toUpperCase()))]
+		.filter(value => ['A', 'B', 'C', 'D'].includes(value))
+		.sort();
+}
+
+function exactMatch(selected, correct) {
+	return selected.length === correct.length &&
+		selected.every((value, index) => value === correct[index]);
+}
+
 // ── Manejar "Siguiente" / "Confirmar" ───────────────────────
 function handleNext() {
-	// Si estamos en modo captcha, mostrar el mensaje de ese paso
 	if ($('btn-next').textContent === 'Confirmar') {
 		showCaptchaFailModal(CAPTCHA_STEPS[captchaStep].message);
 		return;
@@ -225,26 +306,58 @@ function cancelWarning() {
 }
 
 // ── Procesar respuesta ───────────────────────────────────────
-function processAnswer(selected) {
+async function processAnswer(selected) {
 	const q = sessionQuestions[currentIndex];
-	const correct = q.correct;
+	setButtonBusy($('btn-next'), true, 'Guardando...');
+	$('btn-warning-confirm').disabled = true;
 
-	// Comparación exacta (set) — funciona tanto para letras como para números
-	const isCorrect =
-		selected.length === correct.length &&
-		selected.every(s => correct.includes(s));
+	try {
+		if (runtimeMode === 'static') {
+			const correct = normalizeAnswers(q.correct);
+			const normalizedSelected = normalizeAnswers(selected);
+			const isCorrect = exactMatch(normalizedSelected, correct);
 
-	if (isCorrect) score++;
+			if (isCorrect) score++;
 
-	answers.push({
-		question: q.question,
-		options:  q.options,
-		selected,
-		correct,
-		isCorrect
-	});
+			answers.push({
+				id: q.id,
+				question: q.question,
+				options: q.options,
+				selected: normalizedSelected,
+				correct,
+				isCorrect
+			});
 
-	nextQuestionOrResult();
+			nextQuestionOrResult();
+			return;
+		}
+
+		const data = await apiRequest('/api/session/answer', {
+			method: 'POST',
+			body: JSON.stringify({
+				sessionId,
+				questionId: q.id,
+				selected
+			})
+		});
+
+		score = data.score;
+		answers.push({
+			id: q.id,
+			question: q.question,
+			options: q.options,
+			selected,
+			isCorrect: data.isCorrect
+		});
+
+		nextQuestionOrResult();
+	} catch (err) {
+		showFatalError(err.message);
+	} finally {
+		const warningConfirm = $('btn-warning-confirm');
+		if (warningConfirm) warningConfirm.disabled = false;
+		setButtonBusy($('btn-next'), false);
+	}
 }
 
 // ── Pantalla de feedback ─────────────────────────────────────
@@ -267,7 +380,6 @@ function showFeedback(q, selected, correct, isCorrect) {
 		container.appendChild(div);
 	});
 
-	// Cambiar texto del botón en la última pregunta
 	$('btn-next-question').textContent =
 		currentIndex < sessionQuestions.length - 1 ? 'Siguiente pregunta' : 'Ver resultado';
 
@@ -280,18 +392,74 @@ function nextQuestionOrResult() {
 	if (currentIndex < sessionQuestions.length) {
 		showQuestion();
 	} else {
-		// Preguntas normales terminadas → mostrar resultado
 		showResult();
 	}
 }
 
 // ── Pantalla de resultado ────────────────────────────────────
-function showResult() {
-	const won        = score >= MIN_CORRECT;
+async function showResult() {
+	try {
+		if (runtimeMode === 'static') {
+			showStaticResult();
+			return;
+		}
+
+		const result = await apiRequest(`/api/session/result?sessionId=${encodeURIComponent(sessionId)}`);
+		const won = result.won;
+		const hasPrize = Boolean(result.prizeCode);
+		const resultLogo = $('result-logo');
+
+		score = result.score;
+		quizConfig.questionsCount = result.total;
+		quizConfig.minCorrect = result.minCorrect;
+		canSeeAllQuestions = result.reviewMode === 'all';
+		reviewItems = result.review || [];
+
+		$('result-score').textContent = `${score} / ${result.total}`;
+
+		if (won) {
+			resultLogo.src = 'assets/logowinner.png';
+			resultLogo.alt = 'Logo ganador';
+			$('result-title').textContent = '¡Lo conseguiste!';
+
+			if (hasPrize && localStorage.getItem(LS_KEY_WON) !== 'true') {
+				localStorage.setItem(LS_KEY_WON, 'true');
+				$('result-message').textContent = '¡Enhorabuena! Has superado el reto. Aquí tienes tu código de premio exclusivo:';
+				$('prize-box').classList.remove('hidden');
+				$('discount-code').textContent = result.prizeCode;
+			} else {
+				$('result-message').textContent = '¡Volviste a ganar! Pero ya recibiste tu premio en una partida anterior.';
+				$('prize-box').classList.add('hidden');
+			}
+		} else {
+			resultLogo.src = 'assets/logolooser.png';
+			resultLogo.alt = 'Logo perdedor';
+			$('result-title').textContent = 'Casi lo consigues...';
+			$('result-message').textContent =
+				`Has acertado ${score} de ${result.total}. Necesitas al menos ${result.minCorrect} para ganar. ¡Vuelve a intentarlo!`;
+			$('prize-box').classList.add('hidden');
+		}
+
+		$('btn-review').classList.remove('hidden');
+		$('btn-review').textContent = canSeeAllQuestions ? 'Ver todas las preguntas' : 'Revisar mis respuestas';
+
+		showScreen('screen-result');
+	} catch (err) {
+		showFatalError(err.message);
+	}
+}
+
+function showStaticResult() {
+	const won = score >= quizConfig.minCorrect;
 	const hasWonBefore = localStorage.getItem(LS_KEY_WON) === 'true';
 	const resultLogo = $('result-logo');
 
-	$('result-score').textContent = `${score} / ${QUESTIONS_COUNT}`;
+	canSeeAllQuestions = won;
+	reviewItems = won
+		? allQuestions.map(q => ({ ...q, correct: normalizeAnswers(q.correct) }))
+		: answers;
+
+	$('result-score').textContent = `${score} / ${sessionQuestions.length}`;
 
 	if (won) {
 		resultLogo.src = 'assets/logowinner.png';
@@ -299,13 +467,11 @@ function showResult() {
 		$('result-title').textContent = '¡Lo conseguiste!';
 
 		if (!hasWonBefore) {
-			// Primera victoria
 			localStorage.setItem(LS_KEY_WON, 'true');
 			$('result-message').textContent = '¡Enhorabuena! Has superado el reto. Aquí tienes tu código de premio exclusivo:';
 			$('prize-box').classList.remove('hidden');
-			$('discount-code').textContent = DISCOUNT_CODE;
+			$('discount-code').textContent = STATIC_DISCOUNT_CODE;
 		} else {
-			// Victoria repetida
 			$('result-message').textContent = '¡Volviste a ganar! Pero ya recibiste tu premio en una partida anterior.';
 			$('prize-box').classList.add('hidden');
 		}
@@ -314,11 +480,10 @@ function showResult() {
 		resultLogo.alt = 'Logo perdedor';
 		$('result-title').textContent = 'Casi lo consigues...';
 		$('result-message').textContent =
-			`Has acertado ${score} de ${QUESTIONS_COUNT}. Necesitas al menos ${MIN_CORRECT} para ganar. ¡Vuelve a intentarlo!`;
+			`Has acertado ${score} de ${sessionQuestions.length}. Necesitas al menos ${quizConfig.minCorrect} para ganar. ¡Vuelve a intentarlo!`;
 		$('prize-box').classList.add('hidden');
 	}
 
-	canSeeAllQuestions = won;
 	$('btn-review').classList.remove('hidden');
 	$('btn-review').textContent = canSeeAllQuestions ? 'Ver todas las preguntas' : 'Revisar mis respuestas';
 
@@ -331,83 +496,60 @@ function showReview() {
 	list.innerHTML = '';
 	const letters = ['A', 'B', 'C', 'D'];
 
-	const titleEl    = document.querySelector('.review-title');
+	const titleEl = document.querySelector('.review-title');
 	const subtitleEl = document.querySelector('.review-subtitle');
 
 	if (canSeeAllQuestions) {
-		titleEl.textContent    = 'Todas las preguntas';
+		titleEl.textContent = 'Todas las preguntas';
 		subtitleEl.textContent = 'Las respuestas correctas están marcadas en verde.';
-
-		allQuestions.forEach((q, idx) => {
-			const item = document.createElement('div');
-			item.className = 'review-item';
-
-			const header = document.createElement('div');
-			header.className = 'review-item-header';
-			header.textContent = `Pregunta ${idx + 1}`;
-
-			const questionDiv = document.createElement('div');
-			questionDiv.className = 'review-item-question';
-			questionDiv.textContent = q.question;
-
-			const optionsDiv = document.createElement('div');
-			optionsDiv.className = 'review-options';
-
-			q.options.forEach((opt, i) => {
-				const letter = letters[i];
-				const isCorrect = q.correct.includes(letter);
-				const div = document.createElement('div');
-				div.className = `review-option${isCorrect ? ' is-correct' : ''}`;
-				div.innerHTML = `<span class="check">${isCorrect ? '✓' : '·'}</span><strong>${letter}.</strong> ${escapeHTML(opt)}`;
-				optionsDiv.appendChild(div);
-			});
-
-			item.appendChild(header);
-			item.appendChild(questionDiv);
-			item.appendChild(optionsDiv);
-			list.appendChild(item);
-		});
 	} else {
-		titleEl.textContent    = 'Tus respuestas';
+		titleEl.textContent = 'Tus respuestas';
 		subtitleEl.textContent = 'Verde = correcta · Rojo = tu elección incorrecta.';
-
-		answers.forEach((ans, idx) => {
-			const item = document.createElement('div');
-			item.className = 'review-item';
-
-			const header = document.createElement('div');
-			header.className = 'review-item-header';
-			header.textContent = `Pregunta ${idx + 1} · ${ans.isCorrect ? '✅' : '❌'}`;
-
-			const questionDiv = document.createElement('div');
-			questionDiv.className = 'review-item-question';
-			questionDiv.textContent = ans.question;
-
-			const optionsDiv = document.createElement('div');
-			optionsDiv.className = 'review-options';
-
-			ans.options.forEach((opt, i) => {
-				const letter      = letters[i];
-				const isCorrectOpt = ans.correct.includes(letter);
-				const wasSelected  = ans.selected.includes(letter);
-
-				let cls   = '';
-				let check = '·';
-				if (isCorrectOpt)       { cls = ' is-correct'; check = '✓'; }
-				else if (wasSelected)   { cls = ' is-wrong';   check = '✗'; }
-
-				const div = document.createElement('div');
-				div.className = `review-option${cls}`;
-				div.innerHTML = `<span class="check">${check}</span><strong>${letter}.</strong> ${escapeHTML(opt)}`;
-				optionsDiv.appendChild(div);
-			});
-
-			item.appendChild(header);
-			item.appendChild(questionDiv);
-			item.appendChild(optionsDiv);
-			list.appendChild(item);
-		});
 	}
+
+	reviewItems.forEach((item, idx) => {
+		const reviewItem = document.createElement('div');
+		reviewItem.className = 'review-item';
+
+		const header = document.createElement('div');
+		header.className = 'review-item-header';
+		header.textContent = canSeeAllQuestions
+			? `Pregunta ${idx + 1}`
+			: `Pregunta ${idx + 1} · ${item.isCorrect ? '✅' : '❌'}`;
+
+		const questionDiv = document.createElement('div');
+		questionDiv.className = 'review-item-question';
+		questionDiv.textContent = item.question;
+
+		const optionsDiv = document.createElement('div');
+		optionsDiv.className = 'review-options';
+
+		item.options.forEach((opt, i) => {
+			const letter = letters[i];
+			const isCorrectOpt = item.correct.includes(letter);
+			const wasSelected = (item.selected || []).includes(letter);
+
+			let cls = '';
+			let check = '·';
+			if (isCorrectOpt) {
+				cls = ' is-correct';
+				check = '✓';
+			} else if (wasSelected) {
+				cls = ' is-wrong';
+				check = '✗';
+			}
+
+			const div = document.createElement('div');
+			div.className = `review-option${cls}`;
+			div.innerHTML = `<span class="check">${check}</span><strong>${letter}.</strong> ${escapeHTML(opt)}`;
+			optionsDiv.appendChild(div);
+		});
+
+		reviewItem.appendChild(header);
+		reviewItem.appendChild(questionDiv);
+		reviewItem.appendChild(optionsDiv);
+		list.appendChild(reviewItem);
+	});
 
 	showScreen('screen-review');
 }
@@ -425,7 +567,6 @@ function copyCode() {
 			label.textContent = 'Copiar';
 		}, 2000);
 	}).catch(() => {
-		// Fallback para navegadores sin clipboard API
 		const input = document.createElement('input');
 		input.value = code;
 		document.body.appendChild(input);
@@ -439,7 +580,7 @@ function copyCode() {
 
 // ── Escape HTML ──────────────────────────────────────────────
 function escapeHTML(str) {
-	return str
+	return String(str)
 		.replace(/&/g, '&amp;')
 		.replace(/</g, '&lt;')
 		.replace(/>/g, '&gt;')
@@ -462,25 +603,43 @@ function bindEvents() {
 // ── Inicialización ───────────────────────────────────────────
 async function init() {
 	try {
-		const response = await fetch('questions.csv');
-		if (!response.ok) throw new Error(`No se pudo cargar questions.csv (${response.status})`);
-		const text = await response.text();
-		allQuestions = parseCSV(text);
-
-		if (allQuestions.length < QUESTIONS_COUNT) {
-			throw new Error(`El fichero debe tener al menos ${QUESTIONS_COUNT} preguntas. Encontradas: ${allQuestions.length}`);
-		}
-
-		bindEvents();
-		showScreen('screen-start');
+		const health = await apiRequest('/api/health');
+		runtimeMode = 'worker';
+		quizConfig = {
+			questionsCount: health.questionsCount,
+			minCorrect: health.minCorrect
+		};
 	} catch (err) {
-		document.body.innerHTML = `
-			<div style="font-family:system-ui;padding:40px;max-width:600px;margin:auto;text-align:center;">
-				<h2 style="color:#ef4444;">Error al cargar el quiz</h2>
-				<p style="margin-top:12px;color:#555;">${err.message}</p>
-				<p style="margin-top:8px;color:#888;font-size:0.85rem;">Asegúrate de servir el proyecto desde un servidor local (ej: <code>python3 -m http.server</code>)</p>
-			</div>`;
+		try {
+			await initStaticMode();
+		} catch (staticErr) {
+			showFatalError(staticErr.message);
+			return;
+		}
 	}
+
+	bindEvents();
+	showScreen('screen-start');
 }
 
 document.addEventListener('DOMContentLoaded', init);
+
+async function initStaticMode() {
+	runtimeMode = 'static';
+	quizConfig = {
+		questionsCount: STATIC_QUESTIONS_COUNT,
+		minCorrect: STATIC_MIN_CORRECT
+	};
+
+	const response = await fetch('questions.csv');
+	if (!response.ok) {
+		throw new Error(`No se pudo cargar questions.csv (${response.status})`);
+	}
+
+	const text = await response.text();
+	allQuestions = parseCSV(text);
+
+	if (allQuestions.length < quizConfig.questionsCount) {
+		throw new Error(`El fichero debe tener al menos ${quizConfig.questionsCount} preguntas. Encontradas: ${allQuestions.length}`);
+	}
+}

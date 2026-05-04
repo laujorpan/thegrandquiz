@@ -1,4 +1,12 @@
 /.idea/
 /config.js
+/node_modules/
+/package-lock.json
 /.dev.vars*
 /.env*
+/questions.kv.json
+/questions.real.csv
+/questions.private.csv
+/questions.production.csv
+/private/
+/secrets/
