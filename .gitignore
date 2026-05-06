@@ -1,6 +1,7 @@
 /.idea/
 /config.js
 /node_modules/
+/.wrangler/
 /package-lock.json
 /.dev.vars*
 /.env*

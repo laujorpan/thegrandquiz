@@ -603,13 +603,18 @@ function bindEvents() {
 // ── Inicialización ───────────────────────────────────────────
 async function init() {
 	try {
-		const health = await apiRequest('/api/health');
+		const health = await detectWorkerHealth();
 		runtimeMode = 'worker';
 		quizConfig = {
 			questionsCount: health.questionsCount,
 			minCorrect: health.minCorrect
 		};
 	} catch (err) {
+		if (err && err.isWorkerConfigError) {
+			showFatalError(err.message);
+			return;
+		}
+
 		try {
 			await initStaticMode();
 		} catch (staticErr) {
@@ -623,6 +628,44 @@ async function init() {
 }
 
 document.addEventListener('DOMContentLoaded', init);
+
+async function detectWorkerHealth() {
+	let response;
+	try {
+		response = await fetch('/api/health');
+	} catch (err) {
+		throw new Error('Worker no disponible');
+	}
+
+	if (response.status === 404) {
+		throw new Error('Worker no disponible');
+	}
+
+	let data = null;
+	try {
+		data = await response.json();
+	} catch (err) {
+		if (!response.ok) {
+			const error = new Error(`Respuesta inesperada del servidor (${response.status})`);
+			error.isWorkerConfigError = true;
+			throw error;
+		}
+
+		throw new Error('Worker no disponible');
+	}
+
+	if (!response.ok) {
+		const error = new Error((data && data.error) || `Error del servidor (${response.status})`);
+		error.isWorkerConfigError = true;
+		throw error;
+	}
+
+	if (!data || data.ok !== true) {
+		throw new Error('Worker no disponible');
+	}
+
+	return data;
+}
 
 async function initStaticMode() {
 	runtimeMode = 'static';

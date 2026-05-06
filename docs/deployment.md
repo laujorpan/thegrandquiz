@@ -73,6 +73,12 @@ npx wrangler secret put PRIZE_CODE
 
 Puedes guardar el CSV real dentro del proyecto como `questions.real.csv`. Ese archivo está en `.gitignore`, así que no se subirá al repo.
 
+El CSV debe usar `;` como separador, no `,`. La cabecera tiene que ser exactamente:
+
+```csv
+id;question;option_a;option_b;option_c;option_d;correct
+```
+
 ```bash
 npm run questions:export -- questions.real.csv /tmp/thegrandquiz-questions.json
 ```
@@ -80,8 +86,10 @@ npm run questions:export -- questions.real.csv /tmp/thegrandquiz-questions.json
 ## 7. Subir preguntas a KV remoto
 
 ```bash
-npx wrangler kv key put questions --path /tmp/thegrandquiz-questions.json --binding QUESTIONS_KV --remote
+npx wrangler kv key put questions --path /tmp/thegrandquiz-questions.json --binding QUESTIONS_KV --remote --preview false
 ```
+
+`--preview false` evita que Wrangler dude entre el namespace real y el `preview_id`, y fuerza la escritura en el KV remoto de producción.
 
 ## 8. Probar en local con Workers
 
@@ -99,5 +107,5 @@ npm run deploy
 
 ```bash
 npm run questions:export -- questions.real.csv /tmp/thegrandquiz-questions.json
-npx wrangler kv key put questions --path /tmp/thegrandquiz-questions.json --binding QUESTIONS_KV --remote
+npx wrangler kv key put questions --path /tmp/thegrandquiz-questions.json --binding QUESTIONS_KV --remote --preview false
 ```

@@ -1,5 +1,7 @@
 .git/
 .idea/
+node_modules/
+.wrangler/
 docs/
 scripts/
 .assetsignore
@@ -14,6 +16,11 @@ config.js
 package.json
 package-lock.json
 questions.csv
+questions.real.csv
+questions.private.csv
+questions.production.csv
+private/
+secrets/
 questions.kv.json
 worker.js
 wrangler.jsonc
